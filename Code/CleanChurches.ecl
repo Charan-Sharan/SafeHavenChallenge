@@ -1,11 +1,13 @@
-﻿IMPORT $,STD;
+﻿// #OPTION('obfuscateOutput',TRUE);
+IMPORT $,STD;
+EXPORT CLeanChurches:=MODULE
 //This file is used to demonstrate how to "clean" a raw dataset (Churches) and create an index to be used in a ROXIE service
-Churches := $.File_AllData.ChurchDS;
-Cities   := $.File_AllData.City_DS;
+SHARED Churches := $.File_AllData.ChurchDS;
+SHARED Cities   := $.File_AllData.City_DS;
 
 
 //First, determine what fields you want to clean:
-CleanChurchRec := RECORD
+EXPORT CleanChurchRec := RECORD
     STRING70  name;
     STRING35  street;
     STRING22  city;
@@ -15,7 +17,7 @@ CleanChurchRec := RECORD
     UNSIGNED3 PrimaryFIPS; //New - will be added from Cities DS
 END;
 //PROJECT is used to transform one data record to another.
-CleanChurch := PROJECT(Churches,TRANSFORM(CleanChurchRec,
+SHARED CleanChurch := PROJECT(Churches,TRANSFORM(CleanChurchRec,
                                           SELF.name                := STD.STR.ToUpperCase(LEFT.name),
                                           SELF.street              := STD.STR.ToUpperCase(LEFT.street),
                                           SELF.city                := STD.STR.ToUpperCase(LEFT.city),
@@ -24,15 +26,15 @@ CleanChurch := PROJECT(Churches,TRANSFORM(CleanChurchRec,
                                           SELF.affiliation         := LEFT.affiliation,
                                           SELF.PrimaryFIPS         := 0));
 //JOIN is used to combine data from different datasets 
-CleanChurchFIPS :=       JOIN(CleanChurch,Cities,
+SHARED CleanChurchFIPS :=       JOIN(CleanChurch,Cities,
                            LEFT.city  = STD.STR.ToUpperCase(RIGHT.city) AND
                            LEFT.state = RIGHT.state_id,
                            TRANSFORM(CleanChurchRec,
                                      SELF.PrimaryFIPS := (UNSIGNED3)RIGHT.county_fips,
                                      SELF             := LEFT),LEFT OUTER,LOOKUP);
 //Write out the new file and then define it using DATASET
-WriteChurches      := OUTPUT(CleanChurchFIPS,,'~SAFE::OUT::Churches',OVERWRITE);                                          
-CleanChurchesDS    := DATASET('~SAFE::OUT::Churches',CleanChurchRec,FLAT);
+EXPORT WriteChurches      := OUTPUT(CleanChurchFIPS,,'~SAFE::DWC::OUT::Churches',OVERWRITE);                                        
+EXPORT CleanChurchesDS    := DATASET('~SAFE::DWC::OUT::Churches',CleanChurchRec,FLAT);
 
 //Declare and Build Indexes (special datasets that can be used in the ROXIE data delivery cluster
 CleanChurchIDX     := INDEX(CleanChurchesDS,{city,state},{CleanChurchesDS},'~SAFE::IDX::Church::CityPay');
@@ -41,6 +43,7 @@ BuildChurchIDX     := BUILD(CleanChurchIDX,OVERWRITE);
 BuildChurchFIPSIDX := BUILD(CleanChurchFIPSIDX,OVERWRITE);
 
 //SEQUENTIAL is similar to OUTPUT, but executes the actions in sequence instead of the default parallel actions of the HPCC
-SEQUENTIAL(WriteChurches,BuildChurchIDX,BuildChurchFIPSIDX);
+// SEQUENTIAL(WriteChurches,BuildChurchIDX,BuildChurchFIPSIDX);
 
 
+END;

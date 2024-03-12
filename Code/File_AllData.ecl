@@ -1,4 +1,5 @@
 ﻿EXPORT File_AllData := MODULE
+
 //The datasets proivided in this challenge are all in the public domain and free for you to use. 
 //The links to the downloads and specific license info is provided below.
 
@@ -193,21 +194,21 @@ EXPORT HospitalDS := DATASET('~safe::in::Hospitals',HospitalRec,CSV(HEADING(1)))
 //
 EXPORT CitiesRec := RECORD
     STRING45  city;
-    STRING45  city_ascii;
+    STRING45  city_ascii;         //remove this not required
     STRING2   state_id;
     STRING20  state_name;
     UNSIGNED3 county_fips;
-    STRING30  county_name;
+    STRING30  county_name;           
     REAL4     lat;
     REAL8     lng;
     UNSIGNED4 population;
-    REAL4     density;
-    STRING5   source;
-    STRING5   military;
-    STRING5   incorporated;
+    REAL4     density;              
+    STRING5   source;              //not required
+    STRING5   military;            //not-required
+    STRING5   incorporated;        //not so important
     STRING30  timezone;
     UNSIGNED1 ranking;
-    STRING1855 zips;
+    // STRING1855 zips;              
     UNSIGNED5 id;
 END;
 

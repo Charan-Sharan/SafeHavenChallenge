@@ -1,4 +1,5 @@
-﻿IMPORT $,Visualizer;
+﻿#OPTION('obfuscateOutput',TRUE);
+IMPORT $,Visualizer;
 
 Cities := $.File_AllData.City_DS;
 

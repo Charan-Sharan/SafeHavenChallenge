@@ -1,4 +1,5 @@
-﻿IMPORT $;
+﻿#OPTION('obfuscateOutput',TRUE);
+IMPORT $;
 SAFE := $.File_AllData; //See this file for your data dictionary (field names and data sources)
 //RISK:
 OUTPUT(SAFE.unemp_byCountyDS,NAMED('Unemployment'));
@@ -8,6 +9,7 @@ OUTPUT(SAFE.pop_estimatesDS,NAMED('Population'));
 OUTPUT(SAFE.CrimeDS,NAMED('Crime'));
 //RESOURCES:
 OUTPUT(SAFE.PoliceDS,NAMED('Police'));
+OUTPUT(SAFE.PoliceDS(City[1]='S'),NAMED('PoliceFilter'));
 OUTPUT(SAFE.FireDS,NAMED('Fire'));
 OUTPUT(SAFE.HospitalDS,NAMED('Hospitals'));
 OUTPUT(SAFE.ChurchDS,NAMED('Churches'));

@@ -1,6 +1,7 @@
-﻿// POVALL_2021	Estimate of people of all ages in poverty 2021
+﻿#OPTION('obfuscateOutput',TRUE);
 // CI90LBALL_2021	90 percent confidence interval lower bound of estimate of people of all ages in poverty 2021
 // CI90UBALL_2021	90 percent confidence interval upper bound of estimate of people of all ages in poverty 2021
+// POVALL_2021	Estimate of people of all ages in poverty 2021
 // PCTPOVALL_2021	Estimated percent of people of all ages in poverty 2021
 // CI90LBALLP_2021	90 percent confidence interval lower bound of estimate of percent of people of all ages in poverty 2021
 // CI90UBALLP_2021	90 percent confidence interval upper bound of estimate of percent of people of all ages in poverty 2021

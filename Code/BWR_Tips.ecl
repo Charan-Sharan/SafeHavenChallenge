@@ -1,4 +1,5 @@
-﻿IMPORT $,STD;
+﻿#OPTION('obfuscateOutput',TRUE);
+IMPORT $,STD;
 
 UNEMP     := $.File_AllData.unemp_byCountyDS;
 EDU       := $.File_AllData.EducationDS;
