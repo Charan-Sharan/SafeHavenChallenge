@@ -1,7 +1,12 @@
 // #OPTION('obfuscateOutput',TRUE);
 IMPORT $,STD;
-EXPORT BWR_CleanHospitals:=MODULE
+EXPORT CleanHospitals:=MODULE
 SHARED Hospitals:=$.File_AllData.HospitalDS;
+
+
+
+SHARED FORMATCITY:=$.FORMATWORDS.FORMATCITY_V1;
+
 
 EXPORT HospRec:=RECORD
     STRING91 NAME;
@@ -19,7 +24,7 @@ EXPORT CleanHosp:=PROJECT(Hospitals,TRANSFORM(HospRec,
                                       SELF.NAME:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.NAME)),
                                       SELF.STREET:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.address)),
                                       SELF.ZIP:=(UNSIGNED3)LEFT.ZIP,
-                                      SELF.CITY:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.CITY)),
+                                      SELF.CITY:=FORMATCITY(LEFT.CITY),
                                       SELF.STATE:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.STATE)),
                                       SELF.PrimaryFIPS:=(UNSIGNED3)LEFT.countyfips,
                                       SELF.TELEPHONE:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.TELEPHONE)),

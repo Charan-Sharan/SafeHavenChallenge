@@ -3,7 +3,9 @@ IMPORT $,STD;
 EXPORT CLeanChurches:=MODULE
 //This file is used to demonstrate how to "clean" a raw dataset (Churches) and create an index to be used in a ROXIE service
 SHARED Churches := $.File_AllData.ChurchDS;
-SHARED Cities   := $.File_AllData.City_DS;
+SHARED Cities   := $.BaseCityInfo.BaseInfo;
+
+SHARED FORMATCITY:=$.FORMATWORDS.FORMATCITY_V1;
 
 
 //First, determine what fields you want to clean:
@@ -20,7 +22,7 @@ END;
 SHARED CleanChurch := PROJECT(Churches,TRANSFORM(CleanChurchRec,
                                           SELF.name                := STD.STR.ToUpperCase(LEFT.name),
                                           SELF.street              := STD.STR.ToUpperCase(LEFT.street),
-                                          SELF.city                := STD.STR.ToUpperCase(LEFT.city),
+                                          SELF.CITY:=FORMATCITY(LEFT.CITY),
                                           SELF.State               := STD.STR.ToUpperCase(LEFT.state),
                                           SELF.zip                 := LEFT.zip,
                                           SELF.affiliation         := LEFT.affiliation,

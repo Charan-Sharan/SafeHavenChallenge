@@ -2,7 +2,11 @@
 import $,STD;
 EXPORT CleanFireStns:=MODULE
 SHARED Fire:=$.File_AllData.FireDS;
-SHARED City:=$.File_AllData.City_DS;
+SHARED City:=$.BaseCityInfo.BaseInfo;
+
+
+SHARED FORMATCITY:=$.FORMATWORDS.FORMATCITY_V1;
+
 
 EXPORT FireRec:=RECORD
     STRING100 NAME;
@@ -18,7 +22,7 @@ SHARED FireDs:=PROJECT(Fire,TRANSFORM(FireRec,
                                SELF.NAME:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.NAME)),
                                SELF.STREET:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.address)),
                                SELF.ZIP:=(UNSIGNED3)LEFT.ZIPCODE,
-                               SELF.CITY:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.CITY)),
+                               SELF.CITY:=FORMATCITY(LEFT.CITY),
                                SELF.STATE:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.STATE)),
                                SELF.PrimaryFIPS:=0));
 

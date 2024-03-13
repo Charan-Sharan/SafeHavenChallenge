@@ -5,6 +5,9 @@ EXPORT CleanPolicest:=MODULE
 SHARED police:=$.File_AllData.PoliceDS;
 SHARED City:=$.File_AllData.City_DS;
 
+SHARED FORMATCITY:=$.FORMATWORDS.FORMATCITY_V1;
+
+
 EXPORT policerec:=RECORD
     UNSIGNED3 ID;
     STRING133 NAME;
@@ -24,7 +27,7 @@ SHARED CleanPolice:=PROJECT(Police(STD.STR.CleanSpaces(STATUS)!='NOT AVAILABLE')
                                       SELF.NAME:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.NAME)),
                                       SELF.STREET:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.address)),
                                       SELF.ZIP:=(UNSIGNED3)LEFT.ZIP,
-                                      SELF.CITY:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.CITY)),
+                                      SELF.CITY:=FORMATCITY(LEFT.CITY),
                                       SELF.STATE:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.STATE)),
                                       SELF.PrimaryFIPS:=(UNSIGNED3)LEFT.countyfips,
                                       SELF.TELEPHONE:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.TELEPHONE))

@@ -208,7 +208,7 @@ EXPORT CitiesRec := RECORD
     STRING5   incorporated;        //not so important
     STRING30  timezone;
     UNSIGNED1 ranking;
-    // STRING1855 zips;              
+    STRING1855 zips;              
     UNSIGNED5 id;
 END;
 

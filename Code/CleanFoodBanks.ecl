@@ -2,9 +2,14 @@
 EXPORT CleanFoodBanks:=MODULE
 import $,STD;
 SHARED Food:=$.File_AllData.FoodBankDS;
-SHARED City:=$.File_AllData.City_DS;
+SHARED City:=$.BaseCityInfo.BaseInfo;
 SHARED Police:=$.File_AllData.PoliceDS;
 SHARED Church:=$.File_AllData.ChurchDS;
+
+
+
+SHARED FORMATCITY:=$.FORMATWORDS.FORMATCITY_V1;
+
 
 EXPORT FoodRec:=RECORD
     STRING63 NAME;
@@ -20,7 +25,7 @@ CleanFood:=PROJECT(Food,TRANSFORM(FoodRec,
                                   SELF.NAME:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.food_bank_name)),
                                   SELF.STREET:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.address)),
                                   SELF.ZIP:=(UNSIGNED3)LEFT.zip_code,
-                                  SELF.CITY:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.CITY)),
+                                  SELF.CITY:=FORMATCITY(LEFT.CITY),
                                 //   SELF.WEBSITE:=(STD.STR.CleanSpaces(LEFT.web_page)),
                                   SELF.STATE:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.STATE)),
                                   SELF.PrimaryFIPS:=0));
@@ -52,14 +57,15 @@ ds:=DATASET([
 FoodDs2:=JOIN(FoodDs1,ds,
                STD.STR.ToUpperCase(LEFT.CITY)= STD.STR.ToUpperCase(RIGHT.city)AND
                LEFT.PrimaryFIPS=0 AND
-                STD.STR.ToUpperCase(LEFT.STATE)=RIGHT.STATE,TRANSFORM(FoodRec,
-                SELF.PrimaryFIPS:=(UNSIGNED3)RIGHT.county_fips,
+                STD.STR.ToUpperCase(LEFT.STATE)=RIGHT.STATE,
+                TRANSFORM(FoodRec,
+                 SELF.PrimaryFIPS:=(UNSIGNED3)RIGHT.county_fips,
                  SELF.NAME:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.name)),
-                                  SELF.STREET:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.street)),
-                                  SELF.ZIP:=(UNSIGNED3)LEFT.zip,
-                                  SELF.CITY:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.CITY)),
-                                //   SELF.WEBSITE:=(STD.STR.CleanSpaces(LEFT.website)),
-                                  SELF.STATE:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.STATE)),
+                 SELF.STREET:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.street)),
+                 SELF.ZIP:=(UNSIGNED3)LEFT.zip,
+                 SELF.CITY:=FORMATCITY(LEFT.CITY),
+                // /SELF.WEBSITE:=(STD.STR.CleanSpaces(LEFT.website)),
+                 SELF.STATE:=STD.Str.ToUpperCase(STD.STR.CleanSpaces(LEFT.STATE)),
                ));
 // output(FoodDs1);       
 // output(FoodDs2);

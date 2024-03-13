@@ -1,7 +1,7 @@
 #OPTION('obfuscateOutput',TRUE);
 import $,STD;
 
-Hospital:=$.BWR_CleanHospitals.WriteHosp;
+Hospital:=$.CleanHospitals.WriteHosp;
 Hospital;
 
 Churches:=$.CleanChurches.WriteChurches;
@@ -15,8 +15,9 @@ Fire;
 
 Food:=$.CleanFoodBanks.writeFOOD;
 Food;
-createfile:=$.BWR_CreateCoreExample.createDS;
+createfile:=$.AnalyzeSocialFactors.createDS;
 createfile;
 
-BaseFile:=$.BWR_XTAB.WriteBaseData;
+BaseFile:=$.AnalyzeResources.WriteBaseData;
 BaseFile;
+

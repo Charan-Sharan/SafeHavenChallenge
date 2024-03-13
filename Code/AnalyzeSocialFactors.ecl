@@ -1,8 +1,6 @@
-﻿// Let's create a core "risk" file that the county code (FIPS) and the primary city.
-// We can extra ct this data from the Cities file.
-// #OPTION('obfuscateOutput',TRUE);
+﻿
 IMPORT $,STD;
-EXPORT BWR_CreateCoreExample:=MODULE 
+EXPORT AnalyzeSocialFactors:=MODULE 
 
 SHARED CityDS := $.File_AllData.City_DS;
 SHARED Crime  := $.File_AllData.CrimeDS;
@@ -11,21 +9,12 @@ SHARED pop    := $.File_AllData.pop_estimatesDS;
 SHARED pov    := $.File_AllData.pov_estimatesDS;
 SHARED Education := $.File_AllData.EducationDS;
 
-//CityDS(county_fips = 5035); Test to verify data accuracy for the crime score
+
+SHARED FORMATCITY:=$.FORMATWORDS.FORMATCITY_V2;
 
 
-// Declare our core RECORD:
-EXPORT RiskRec := RECORD
-    STRING45  city;
-    STRING2   state_id;
-    STRING20  state_name;
-    UNSIGNED3 county_fips;
-    STRING30  county_name;
-END;
+SHARED BAseinfo:= $.BaseCityInfo.BaseInfo;
 
-
-SHARED BaseInfo := PROJECT(CityDS,RiskRec);
-// OUTPUT(BaseInfo,NAMED('BaseData'));
 
 EXPORT RiskPlusRec := RECORD
  BaseInfo;
@@ -33,26 +22,26 @@ EXPORT RiskPlusRec := RECORD
  Decimal5_2 PovertyScore    := 0;
  Unsigned4 PopulationScore := 0;
  Unsigned4 CrimeScore      := 0;
- Decimal5_2 Total           := 0;
+ Decimal5_2 RiskFactor           := 0;
 END; 
  
 EXPORT RiskTbl := TABLE(BaseInfo,RiskPlusRec);
 // OUTPUT(RiskTbl,NAMED('BuildTable'));
 // output(count(risktbl),named('buildcnt'));
-//Let's add a Crime Score!
+
 
 EXPORT CrimeRec := RECORD
 CrimeRate := TRUNCATE((INTEGER)Crime.crime_rate_per_100000);
 Crime.fips_st;
 fips_cty := (INTEGER)Crime.fips_cty;
-Fips := Crime.fips_st + INTFORMAT(Crime.fips_cty,3,1);
+STRING5 Fips := INTFORMAT(Crime.fips_st,2,1) + INTFORMAT(Crime.fips_cty,3,1);
 END;
 
 EXPORT CrimeTbl := TABLE(Crime,CrimeRec);
 // OUTPUT(CrimeTbl,NAMED('BuildCrimeTable'));
 
 EXPORT JoinCrime := JOIN(CrimeTbl,RiskTbl,
-                  LEFT.fips = (STRING5)RIGHT.county_fips,
+                  LEFT.fips = (STRING5)RIGHT.county_fips ,
                   TRANSFORM(RiskPlusRec,
                             SELF.CrimeScore := LEFT.crimerate,
                             SELF            := RIGHT),
@@ -64,38 +53,44 @@ EXPORT JoinCrime := JOIN(CrimeTbl,RiskTbl,
 
 PovRec:=RECORD
     UNSIGNED3 PrimaryFips;
+    STRING35  Area_name;
     decimal5_2 Pov_rate:=0;
 END;
 
 PovTab:=PROJECT(pov(STD.str.CleanSpaces(attribute)='PCTPOVALL_2021'),TRANSFORM(povRec,
                                                            SELF.PrimaryFIPS:=(UNSIGNED3)LEFT.fips_code,
+                                                           SELF.Area_Name:=FORMATCITY(LEFT.AREA_NAME),
                                                            SELF.pov_rate:=LEFT.value));
 
-JOINpov := JOIN(PovTab,JOINCrime,
-                LEFT.PrimaryFIPS=RIGHT.county_fips,TRANSFORM(RiskPlusRec,
+EXPORT JOINpov := JOIN(PovTab,JOINCrime,
+                LEFT.PrimaryFIPS=RIGHT.county_fips,
+                TRANSFORM(RiskPlusRec,
                 SELF.PovertyScore:=LEFT.Pov_rate,
                 SELF := RIGHT;
                 ),RIGHT OUTER);   
 // output(SORT(JOinpov,-CrimeScore),Named('addedPovRate'));        
 
 // output(COUNT(Joinpov),named('pov'));
-popRec:=RECORD
+SHARED popRec:=RECORD
     UNSIGNED3 Primaryfips;
     UNSIGNED4 popCount;
     STRING2 state;
+    STRING50  Area_Name;
     UNSIGNED4 popscore;
 END;
 // output(SORT(pop(STD.Str.CleanSpaces(attribute)='POP_ESTIMATE_2021'),value));
-popTab:=PROJECT(pop(STD.Str.CleanSpaces(attribute)='POP_ESTIMATE_2021'),TRANSFORM(popRec,
+EXPORT popTab:=PROJECT(pop(STD.Str.CleanSpaces(attribute)='POP_ESTIMATE_2021'),TRANSFORM(popRec,
                                         SELF.Primaryfips:=LEFT.fips_code,
                                         SELF.popCount:=LEFT.value,
                                         SELF.state:=LEFT.state,
+                                        SELF.Area_Name:=FORMATCITY(LEFT.AREA_NAME),
                                         SELF.popscore:=0));
-popscore:=PROJECT(sort(popTab,popcount),TRANSFORM(popRec,
+EXPORT popscore:=PROJECT(sort(popTab,popcount),TRANSFORM(popRec,
                                         SELF.popscore:=COUNTER,
                                         SELF:=LEFT));
-joinpop:=JOIN(popscore,JoinPov, 
-                LEFT.PrimaryFIPS=RIGHT.county_fips,TRANSFORM(RiskPlusRec,
+EXPORT joinpop:=JOIN(popscore,JoinPov, 
+                LEFT.PrimaryFIPS=RIGHT.county_fips ,
+                TRANSFORM(RiskPlusRec,
                 SELF.PopulationScore:=LEFT.popscore,
                 SELF := RIGHT;
                 ),RIGHT OUTER);  
@@ -105,30 +100,40 @@ joinpop:=JOIN(popscore,JoinPov,
 edcRec:=RECORD
     UNSIGNED3 PrimaryFips;
     STRING2 state;
+     STRING45  Area_name;
     DECIMAL5_2 eduscore:=0;
+   
 END;
 
 
-eduTab:=PROJECT(education(STD.Str.CleanSpaces(attribute)='Percent of adults with less than a high school diploma, 2017-21'),TRANSFORM(edcREC,
+SHARED eduTab:=PROJECT(education(STD.Str.CleanSpaces(attribute)='Percent of adults with less than a high school diploma, 2017-21'),TRANSFORM(edcREC,
                                               SELF.PrimaryFips:=LEFT.fips_code,
                                               SELF.state:=LEFT.state,
+                                              SELF.Area_Name:=FORMATCITY(LEFT.AREA_NAME),
                                               SELF.eduscore:=LEFT.value;
                                               ));
-JOinEDU:=JOIN(eduTab,joinpop,
-                LEFT.PrimaryFIPS=RIGHT.county_fips,TRANSFORM(RiskPlusRec,
+EXPORT JOinEDU:=JOIN(eduTab,joinpop,
+                LEFT.PrimaryFIPS=RIGHT.county_fips ,
+                TRANSFORM(RiskPlusRec,
                 SELF.EducationScore:=LEFT.eduscore,
                 SELF := RIGHT;
                 ),RIGHT OUTER);   
-EXPORT createDS:=OUTPUT(JoinEDU,,'~SAFE::DWC::OUT::SocialFact',OVERWRITE);
 
-EXPORT FinalDs:=DATASET('~SAFE::DWC::OUT::SocialFact',RiskPlusRec,THOR);
+
+SHARED NormalizeScore:=PROJECT(JoinEDu,TRANSFORM(RiskPlusRec,
+                        SELF.crimescore:=(LEFT.crimeScore/1791)*100,
+                        SELF.populationScore:=(LEFT.populationScore/3264)*100,
+                        SELF:=LEFT));
+//RiskFactor Contrubution by weights
+SHARED Decimal2_2 CrimeWt:=0.5;
+SHARED Decimal2_2 PovertyWt:=0.3;
+SHARED Decimal2_2 educationWt:=0.15;
+SHARED Decimal2_2 populationWt:=0.05;
+EXPORT CalcTotalval:=PROJECT(NormalizeScore,TRANSFORM(RiskPlusRec,
+                    SELF.RiskFactor:=(LEFT.crimeScore*crimeWt+LEFT.PovertyScore*PovertyWt+LEFT.EducationScore*educationWt+LEFT.PopulationScore*PopulationWt),
+                    SELF:=LEFT));
+EXPORT createDS:=OUTPUT(CalcTotalval,,'~SAFE::DWC::OUT::SocialFactors',OVERWRITE);
+EXPORT SocialFactorDS:=DATASET('~SAFE::DWC::OUT::SocialFactors',RECORDOF(Joinedu),THOR);
 END; 
   
-// output(cleanedu);
-// output(COUNT(Cleanedu));      
-//Now go out and get the others! Good like with your challenge! 
-// After you complete the other scores, make sure to OUTPUT to a file and then create a DATASET so
-//that you can reference and deliver it to the judges.                           
-
-
 
