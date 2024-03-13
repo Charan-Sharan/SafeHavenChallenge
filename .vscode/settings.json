@@ -1,6 +1,4 @@
 {
     "ecl.launchConfiguration": "Hackathon",
-    "ecl.targetCluster": {
-        "Hackathon": "thor"
-    }
+    "ecl.targetCluster": {}
 }
