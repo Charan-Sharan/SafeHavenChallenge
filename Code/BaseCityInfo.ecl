@@ -16,6 +16,7 @@ SHARED RiskRec := RECORD
 END;
 
 
+
 EXPORT BaseInfo := PROJECT(CityDS,TRANSFORM(RiskRec,
                                     SELF.Zipcodes:=(SET OF UNSIGNED3)STD.Str.SplitWords(LEFT.zips,' '),
                                     SELF.CITY:=FORMATCITY(LEFT.CITY),
