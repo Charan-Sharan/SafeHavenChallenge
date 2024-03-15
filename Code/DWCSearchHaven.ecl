@@ -15,12 +15,12 @@ Basekey := $.Generate_IDX.CSIDX;
 
 
 
-EXPORT DWCSearchHaven(STRING44 City_key,STRING2 State_key,UNSIGNED3 Fips_key,STRING44 CountyNameKey,UNSIGNED3 ZIPCODEKey)       := FUNCTION
+EXPORT DWCSearchHaven(STRING44 City_key,STRING2 State_key,UNSIGNED3 Fips_key,STRING44 CountyName_Key,UNSIGNED3 ZIPCODEKey)       := FUNCTION
          
 Heaven_filter:=BASEKEY(City_key='' OR Formatcity(City_Key)=City,
                 State_key='' OR formatcity(State_key)=State_id,
                 Fips_key=0  OR Fips_key=county_fips,
-                CountyNameKey='' OR formatcity(CountyName_Key)=county_name,
+                CountyName_Key='' OR formatcity(CountyName_Key)=county_name,
                 ZipCode_Key=0 OR ZipCode_key in ZipCodes
                 );
 
